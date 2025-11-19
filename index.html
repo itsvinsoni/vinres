@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prepe - Respiratory System (श्वसन तंत्र)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Noto+Sans+Devanagari:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Required libraries for PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+        body {
+            font-family: 'Poppins', 'Noto Sans Devanagari', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #dbe7ff 100%);
+        }
+        .scroll-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-y: auto;
+            gap: 2.5rem; /* 40px */
+            padding: 2.5rem 0;
+            width: 100%;
+            min-height: 100vh;
+            scrollbar-width: none;
+        }
+        .scroll-container::-webkit-scrollbar { display: none; }
+        .slide {
+            flex-shrink: 0;
+            width: 95%; 
+            max-width: 1080px;
+            height: auto;
+            background-color: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            color: #1a202c;
+            position: relative;
+            box-shadow: 0 20px 60px -10px rgba(0, 0, 0, 0.15);
+            border-radius: 36px;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            overflow: hidden;
+            padding: 1.5rem; /* 24px */
+            display: flex;
+            flex-direction: column;
+            background-image: url('data:image/svg+xml;utf8,<svg width="350" height="200" xmlns="http://www.w3.org/2000/svg"><text x="50%" y="50%" font-size="50" font-weight="bold" font-family="Poppins, sans-serif" fill="rgba(0,0,0,0.04)" text-anchor="middle" dominant-baseline="middle" transform="rotate(-30 175 100)">Prepe</text></svg>');
+        }
+        @media (min-width: 640px) {
+            .slide {
+                padding: 2.8125rem; /* 45px */
+            }
+        }
+        .brand-logo {
+            position: absolute;
+            top: 1.5rem; /* 24px */
+            left: 1.5rem; /* 24px */
+            font-size: 2rem; /* 32px */
+            font-weight: 700;
+            color: #f97316;
+            z-index: 1;
+        }
+        @media (min-width: 640px) {
+           .brand-logo {
+                top: 2.8125rem; /* 45px */
+                left: 2.8125rem; /* 45px */
+                font-size: 2.125rem; /* 34px */
+           }
+        }
+        #download-pdf-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-image: linear-gradient(to right, #1d4ed8 0%, #3b82f6 51%, #1d4ed8 100%);
+            background-size: 200% auto;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 9999px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+            transition: all 0.3s ease-in-out;
+            z-index: 100;
+            border: none;
+        }
+        @media (min-width: 640px) {
+            #download-pdf-btn {
+                bottom: 30px;
+                right: 30px;
+                padding: 15px 30px;
+                font-size: 1.125rem;
+            }
+        }
+        #download-pdf-btn:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 12px 28px rgba(59, 130, 246, 0.5);
+            background-position: right center;
+        }
+        #loader-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.6); display: none; justify-content: center;
+            align-items: center; z-index: 1000; color: white; font-size: 24px;
+            font-weight: 600; backdrop-filter: blur(5px);
+        }
+        .slide-title {
+            font-size: 2rem; /* 32px */
+            font-weight: 700; text-align: center; margin-top: 4rem;
+            margin-bottom: 2rem; color: #1a202c; letter-spacing: -1.5px;
+            position: relative; z-index: 1;
+        }
+        @media (min-width: 640px) {
+            .slide-title {
+                font-size: 2.875rem; /* 46px */
+                margin-top: 3.75rem; /* 60px */
+                margin-bottom: 1.875rem; /* 30px */
+            }
+        }
+        .card {
+             background-color: rgba(255, 255, 255, 0.85);
+             border-radius: 22px; padding: 1.25rem;
+             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.07);
+             border: 1px solid rgba(255, 255, 255, 0.5);
+             display: flex; flex-direction: column;
+             transition: all 0.3s ease-in-out;
+             position: relative; z-index: 1;
+        }
+        .card:not(.mind-map-card):hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        }
+        .card-title {
+             font-size: 1.125rem; /* 18px */
+             font-weight: 700; margin-bottom: 0.75rem;
+             padding-bottom: 0.625rem; border-bottom: 1px solid rgba(0,0,0,0.07);
+             display: flex; align-items: center;
+        }
+        @media (min-width: 640px) {
+            .card-title { font-size: 1.25rem; /* 20px */ }
+        }
+        .card-title .icon {
+            margin-right: 0.75rem; font-size: 1.25rem; width: 36px; height: 36px;
+            display: grid; place-items: center; border-radius: 50%;
+            background-color: var(--icon-bg, #fef2e5); color: var(--icon-color, #f97316);
+        }
+        .card-content {
+            font-size: 0.9375rem; /* 15px */
+            line-height: 1.75; flex-grow: 1;
+        }
+    </style>
+</head>
+<body>
+    <div id="loader-overlay">
+        <span><i class="fa-solid fa-spinner fa-spin mr-3"></i>Generating PDF...</span>
+    </div>
+
+    <div class="scroll-container">
+        <!-- Slide 1: Overview & Anatomy -->
+        <div id="slide1" class="slide">
+            <div class="brand-logo">Prepe</div>
+            <h1 class="slide-title">🫁 श्वसन तंत्र: One Page Note</h1>
+            <!-- Desktop Mindmap Layout -->
+            <div class="hidden md:flex flex-grow items-center justify-center">
+                <div class="w-full h-full relative flex items-center justify-center" style="min-height: 700px;">
+                    <svg class="absolute top-0 left-0 w-full h-full z-10" viewbox="0 0 990 990">
+                        <defs><linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" style="stop-color:#fdbf72;stop-opacity:1" /><stop offset="100%" style="stop-color:#f97316;stop-opacity:1" /></linearGradient></defs>
+                        <line x1="495" y1="495" x2="215" y2="280" stroke="url(#lineGrad)" stroke-width="2.5" /><line x1="495" y1="495" x2="775" y2="280" stroke="url(#lineGrad)" stroke-width="2.5" /><line x1="495" y1="495" x2="111" y2="495" stroke="url(#lineGrad)" stroke-width="2.5" /><line x1="495" y1="495" x2="879" y2="495" stroke="url(#lineGrad)" stroke-width="2.5" /><line x1="495" y1="495" x2="215" y2="710" stroke="url(#lineGrad)" stroke-width="2.5" /><line x1="495" y1="495" x2="775" y2="710" stroke="url(#lineGrad)" stroke-width="2.5" />
+                    </svg>
+                    <!-- Center Core -->
+                    <div class="absolute w-72 h-72 bg-gradient-to-br from-orange-500 to-red-500 rounded-full flex flex-col items-center justify-center text-white shadow-2xl z-20"><h2 class="text-4xl font-bold">Respiratory</h2><p class="text-2xl font-semibold">System</p></div>
+                    
+                    <!-- Top Left -->
+                    <div class="card mind-map-card absolute w-64 text-center transform -translate-x-[22rem] -translate-y-52 z-30"><h3 class="card-title justify-center text-base" style="--icon-color: #c2410c; --icon-bg: #fff7ed;"><i class="fa-solid fa-wind icon"></i> Upper Tract (ऊपरी हिस्सा)</h3><ul class="text-xs list-disc list-inside text-left"><li><strong>Nose:</strong> हवा को छानना और गर्म करना</li><li><strong>Pharynx:</strong> गला (हवा और खाने का रास्ता)</li><li><strong>Larynx:</strong> आवाज बनाने वाला (Voice Box)</li><li><strong>Epiglottis:</strong> खाने को सांस नली में जाने से रोकता है</li></ul></div>
+                    
+                    <!-- Top Right -->
+                    <div class="card mind-map-card absolute w-64 text-center transform translate-x-[22rem] -translate-y-52 z-30"><h3 class="card-title justify-center text-base" style="--icon-color: #4b5563; --icon-bg: #f3f4f6;"><i class="fa-solid fa-lungs icon"></i> Lower Tract (निचला हिस्सा)</h3><ul class="text-xs list-disc list-inside text-left"><li><strong>Trachea:</strong> सांस की नली (Windpipe)</li><li><strong>Bronchi:</strong> फेफड़ों में जाने वाली शाखाएं</li><li><strong>Alveoli:</strong> हवा की थैलियां (Gas exchange)</li><li><strong>Lungs:</strong> मुख्य श्वसन अंग</li></ul></div>
+                    
+                    <!-- Middle Left -->
+                    <div class="card mind-map-card absolute w-64 text-center transform -translate-x-96 z-30"><h3 class="card-title justify-center text-base" style="--icon-color: #2563eb; --icon-bg: #eff6ff;"><i class="fa-solid fa-arrows-down-to-line icon"></i> Inspiration (सांस लेना)</h3><ul class="text-xs list-disc list-inside text-left"><li><strong>प्रक्रिया:</strong> Active (ऊर्जा लगती है)</li><li><strong>Diaphragm:</strong> सिकुड़ता है (चपटा हो जाता है)</li><li><strong>Volume:</strong> छाती की जगह बढ़ती है</li><li><strong>हवा:</strong> अंदर आती है (2 सेकंड)</li></ul></div>
+                    
+                    <!-- Middle Right -->
+                    <div class="card mind-map-card absolute w-64 text-center transform translate-x-96 z-30"><h3 class="card-title justify-center text-base" style="--icon-color: #16a34a; --icon-bg: #f0fdf4;"><i class="fa-solid fa-arrows-up-to-line icon"></i> Expiration (सांस छोड़ना)</h3><ul class="text-xs list-disc list-inside text-left"><li><strong>प्रक्रिया:</strong> Passive (आराम से)</li><li><strong>Diaphragm:</strong> रिलैक्स (वापस गुंबद जैसा)</li><li><strong>Volume:</strong> छाती की जगह कम होती है</li><li><strong>हवा:</strong> बाहर जाती है (3 सेकंड)</li></ul></div>
+                    
+                    <!-- Bottom Left -->
+                    <div class="card mind-map-card absolute w-64 text-center transform -translate-x-[22rem] translate-y-52 z-30"><h3 class="card-title justify-center text-base" style="--icon-color: #7e22ce; --icon-bg: #f5f3ff;"><i class="fa-solid fa-code-branch icon"></i> Zones (क्षेत्र)</h3><ul class="text-xs list-disc list-inside text-left"><li><strong>Conducting:</strong> केवल हवा ले जाना (Nose to Bronchioles)</li><li><strong>Respiratory:</strong> असली गैस एक्सचेंज (Alveoli)</li><li><strong>कार्य:</strong> हवा को साफ और नम करना</li></ul></div>
+                    
+                    <!-- Bottom Right -->
+                    <div class="card mind-map-card absolute w-64 text-center transform translate-x-[22rem] translate-y-52 z-30"><h3 class="card-title justify-center text-base" style="--icon-color: #ca8a04; --icon-bg: #fefce8;"><i class="fa-solid fa-brain icon"></i> Control (नियंत्रण)</h3><ul class="text-xs list-disc list-inside text-left"><li><strong>Medulla:</strong> सांस की लय (Rhythm) बनाता है</li><li><strong>Pons:</strong> सांस की गति (Rate) कंट्रोल करता है</li><li><strong>Trigger:</strong> जब खून में CO2 बढ़ती है</li><li><strong>संकेत:</strong> दिमाग को सिग्नल मिलता है</li></ul></div>
+                </div>
+            </div>
+             <!-- Mobile Vertical Layout -->
+            <div class="md:hidden flex flex-col items-center gap-4">
+                <div class="w-60 h-60 bg-gradient-to-br from-orange-500 to-red-500 rounded-full flex flex-col items-center justify-center text-white shadow-2xl mb-4"><h2 class="text-3xl font-bold">Shwasan</h2><p class="text-xl font-semibold">Tantra</p></div>
+                <div class="w-full grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="card"><h3 class="card-title" style="--icon-color: #c2410c; --icon-bg: #fff7ed;"><i class="fa-solid fa-wind icon"></i> Upper Tract (ऊपरी हिस्सा)</h3><ul class="text-sm list-disc list-inside text-left"><li><strong>Nose:</strong> हवा छानना और गर्म करना</li><li><strong>Pharynx:</strong> खाने और हवा का रास्ता</li><li><strong>Larynx:</strong> आवाज पेटी (Voice Box)</li></ul></div>
+                    <div class="card"><h3 class="card-title" style="--icon-color: #4b5563; --icon-bg: #f3f4f6;"><i class="fa-solid fa-lungs icon"></i> Lower Tract (निचला हिस्सा)</h3><ul class="text-sm list-disc list-inside text-left"><li><strong>Trachea:</strong> सांस की नली</li><li><strong>Alveoli:</strong> गैसों का एक्सचेंज</li><li><strong>Lungs:</strong> मुख्य अंग</li></ul></div>
+                    <div class="card"><h3 class="card-title" style="--icon-color: #2563eb; --icon-bg: #eff6ff;"><i class="fa-solid fa-arrows-down-to-line icon"></i> Inspiration (सांस लेना)</h3><ul class="text-sm list-disc list-inside text-left"><li>Diaphragm नीचे जाता है</li><li>छाती फूलती है (Volume बढ़ता है)</li></ul></div>
+                    <div class="card"><h3 class="card-title" style="--icon-color: #16a34a; --icon-bg: #f0fdf4;"><i class="fa-solid fa-arrows-up-to-line icon"></i> Expiration (सांस छोड़ना)</h3><ul class="text-sm list-disc list-inside text-left"><li>Diaphragm अपनी जगह आता है</li><li>छाती पिचकती है (Volume कम होता है)</li></ul></div>
+                    <div class="card"><h3 class="card-title" style="--icon-color: #7e22ce; --icon-bg: #f5f3ff;"><i class="fa-solid fa-code-branch icon"></i> Zones</h3><ul class="text-sm list-disc list-inside text-left"><li>Conducting: हवा ले जाना</li><li>Respiratory: गैस बदलना</li></ul></div>
+                    <div class="card"><h3 class="card-title" style="--icon-color: #ca8a04; --icon-bg: #fefce8;"><i class="fa-solid fa-brain icon"></i> Control</h3><ul class="text-sm list-disc list-inside text-left"><li>Medulla और Pons कंट्रोल करते हैं</li><li>CO2 बढ़ने पर सांस तेज होती है</li></ul></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2: Volumes & Capacities -->
+        <div id="slide2" class="slide">
+            <div class="brand-logo">Prepe</div>
+            <h1 class="slide-title">📊 फेफड़ों की क्षमता (Volumes)</h1>
+            <div class="flex-grow grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Chart Section -->
+                <div class="card lg:col-span-3 p-4 md:p-6">
+                    <h3 class="card-title text-gray-700 m-0 pb-4 text-center md:text-left" style="border:none;"><i class="fa-solid fa-ruler-horizontal icon"></i> Pulmonary Volumes (कितनी हवा आती-जाती है)</h3>
+                    <div class="w-full flex-grow space-y-3.5 text-sm font-semibold flex flex-col justify-center">
+                        <div class="flex items-center gap-2 md:gap-4"><span class="w-24 md:w-32 text-right font-bold text-xs md:text-sm">TLC (कुल क्षमता)</span><div class="h-5 flex-grow bg-gray-200 rounded-full"><div class="h-5 rounded-full bg-gradient-to-r from-red-400 to-red-500" style="width: 100%;"></div></div><span class="w-12 text-left font-bold text-xs md:text-sm">5800ml</span></div>
+                        <div class="flex items-center gap-2 md:gap-4"><span class="w-24 md:w-32 text-right font-bold text-xs md:text-sm">VC (महत्वपूर्ण)</span><div class="h-5 flex-grow bg-gray-200 rounded-full"><div class="h-5 rounded-full bg-gradient-to-r from-cyan-400 to-cyan-500" style="width: 80%;"></div></div><span class="w-12 text-left font-bold text-xs md:text-sm">4600ml</span></div>
+                        <div class="flex items-center gap-2 md:gap-4"><span class="w-24 md:w-32 text-right font-bold text-xs md:text-sm">IRV (जोर से सांस)</span><div class="h-5 flex-grow bg-gray-200 rounded-full"><div class="h-5 rounded-full bg-gradient-to-r from-blue-400 to-blue-500" style="width: 52%;"></div></div><span class="w-12 text-left font-bold text-xs md:text-sm">3000ml</span></div>
+                        <div class="flex items-center gap-2 md:gap-4"><span class="w-24 md:w-32 text-right font-bold text-xs md:text-sm">RV (बची हुई हवा)</span><div class="h-5 flex-grow bg-gray-200 rounded-full"><div class="h-5 rounded-full bg-gradient-to-r from-green-400 to-green-500" style="width: 21%;"></div></div><span class="w-12 text-left font-bold text-xs md:text-sm">1200ml</span></div>
+                        <div class="flex items-center gap-2 md:gap-4"><span class="w-24 md:w-32 text-right font-bold text-xs md:text-sm">ERV (जोर से छोड़ना)</span><div class="h-5 flex-grow bg-gray-200 rounded-full"><div class="h-5 rounded-full bg-gradient-to-r from-purple-400 to-purple-500" style="width: 19%;"></div></div><span class="w-12 text-left font-bold text-xs md:text-sm">1100ml</span></div>
+                        <div class="flex items-center gap-2 md:gap-4"><span class="w-24 md:w-32 text-right font-bold text-xs md:text-sm">TV (नॉर्मल सांस)</span><div class="h-5 flex-grow bg-gray-200 rounded-full"><div class="h-5 rounded-full bg-gradient-to-r from-indigo-400 to-indigo-500" style="width: 9%;"></div></div><span class="w-12 text-left font-bold text-xs md:text-sm">500ml</span></div>
+                    </div>
+                </div>
+                <!-- Info Cards -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 lg:col-span-3 gap-6">
+                    <div class="card sm:col-span-2 lg:col-span-1"><h3 class="card-title" style="--icon-color: #1e40af; --icon-bg: #dbeafe;"><i class="fa-solid fa-lungs icon"></i> Lung Anatomy (संरचना)</h3><ul class="card-content text-sm space-y-3 pl-2"><li><strong>Right Lung:</strong> 3 हिस्से (Lobes), थोड़ा भारी (625g)</li><li><strong>Left Lung:</strong> 2 हिस्से, दिल के लिए जगह (Cardiac Notch)</li><li><strong>Pleura:</strong> फेफड़ों की दोहरी सुरक्षा परत</li><li><strong>Pleural Fluid:</strong> रगड़ (Friction) कम करता है</li><li><strong>Shape:</strong> शंकु जैसा (Cone Shape)</li></ul></div>
+                    <div class="card sm:col-span-2 lg:col-span-1"><h3 class="card-title" style="--icon-color: #166534; --icon-bg: #dcfce7;"><i class="fa-solid fa-microscope icon"></i> Alveoli (काम करने वाली इकाई)</h3><ul class="card-content text-sm space-y-3 pl-2"><li><strong>संख्या:</strong> लगभग 30 करोड़ (300 Million)</li><li><strong>Type I Cells:</strong> गैसों का आदान-प्रदान करती हैं</li><li><strong>Type II Cells:</strong> Surfactant बनाती हैं</li><li><strong>Surfactant:</strong> फेफड़ों को चिपकने (Collapse) से रोकता है</li><li><strong>दीवार:</strong> बहुत पतली होती है (0.5 µm)</li></ul></div>
+                    <div class="card sm:col-span-2 lg:col-span-1"><h3 class="card-title" style="--icon-color: #0ea5e9; --icon-bg: #e0f2fe;"><i class="fa-solid fa-dumbbell icon"></i> श्वसन की मांसपेशियां (Muscles)</h3><div class="card-content space-y-3 text-xs pt-2"><div><h4 class="font-bold text-blue-700">सामान्य सांस लेना (Normal)</h4><p class="mt-1">Diaphragm (75% काम) + पसलियों की मसल्स</p></div><div><h4 class="font-bold text-cyan-700">जोर से सांस लेना (Forced)</h4><p class="mt-1">गले की मसल्स भी मदद करती हैं</p></div><div><h4 class="font-bold text-red-700">जोर से सांस छोड़ना</h4><p class="mt-1">पेट (Abdominal) की मसल्स दबती हैं</p></div><div><h4 class="font-bold text-green-700">Diaphragm की नर्व</h4><p class="mt-1">Phrenic Nerve</p></div></div></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: Physiology & Transport -->
+        <div id="slide3" class="slide">
+            <div class="brand-logo">Prepe</div>
+            <h1 class="slide-title">🔄 श्वसन की प्रक्रिया (Physiology)</h1>
+            <div class="flex-grow grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Left Panel: Mechanism -->
+                <div class="card md:row-span-2"><h3 class="card-title" style="--icon-color: #2563eb; --icon-bg: #dbeafe;"><i class="fa-solid fa-gears icon"></i> सांस कैसे चलती है?</h3><div class="card-content flex flex-col justify-around text-sm gap-4"><div class="border-b-2 border-dashed border-gray-200 pb-3"><h4 class="font-bold text-lg text-blue-800 flex items-center"><i class="fa-solid fa-arrow-down text-2xl w-8 mr-2"></i> वेंटिलेशन (Ventilation)</h4><ul class="mt-2 list-disc list-inside text-left px-2 md:px-4 space-y-1"><li><strong>नियम:</strong> हवा ज्यादा दबाव से कम दबाव की ओर जाती है</li><li><strong>सांस लेना:</strong> फेफड़ों में दबाव कम हो जाता है</li><li><strong>सांस छोड़ना:</strong> फेफड़ों में दबाव बढ़ जाता है</li></ul></div><div class="py-3 border-b-2 border-dashed border-gray-200"><h4 class="font-bold text-lg text-green-800 flex items-center"><i class="fa-solid fa-exchange-alt text-2xl w-8 mr-2"></i> बाहरी श्वसन (External)</h4><ul class="mt-2 list-disc list-inside text-left px-2 md:px-4 space-y-1"><li><strong>जगह:</strong> Alveoli और खून (Blood) के बीच</li><li><strong>O2:</strong> Alveoli से निकलकर खून में जाती है</li><li><strong>CO2:</strong> खून से निकलकर फेफड़ों में आती है</li></ul></div><div class="pt-3"><h4 class="font-bold text-lg text-yellow-800 flex items-center"><i class="fa-solid fa-dna text-2xl w-8 mr-2"></i> आंतरिक श्वसन (Internal)</h4><ul class="mt-2 list-disc list-inside text-left px-2 md:px-4 space-y-1"><li><strong>जगह:</strong> खून (Blood) और शरीर की Cells के बीच</li><li><strong>O2:</strong> खून से निकलकर Cells में जाती है</li><li><strong>CO2:</strong> Cells से निकलकर खून में आती है</li></ul></div></div></div>
+                
+                <!-- Right Panel: Transport -->
+                <div class="card"><h3 class="card-title" style="--icon-color: #ea580c; --icon-bg: #fff7ed;"><i class="fa-solid fa-droplet icon"></i> Oxygen (O2) का सफर</h3><ul class="card-content text-sm space-y-2 pl-2"><li><i class="fa-solid fa-check text-orange-500 w-5"></i> <strong>97%:</strong> Hemoglobin के साथ जुड़कर (RBC में)</li><li><i class="fa-solid fa-check text-orange-500 w-5"></i> <strong>3%:</strong> Plasma में घुलकर</li><li><i class="fa-solid fa-check text-orange-500 w-5"></i> <strong>1 Hb:</strong> 4 Oxygen के कण ले जा सकता है</li><li><i class="fa-solid fa-check text-orange-500 w-5"></i> <strong>Graph:</strong> S-आकार का (Sigmoid Curve)</li></ul></div>
+                
+                <div class="card"><h3 class="card-title" style="--icon-color: #16a34a; --icon-bg: #f0fdf4;"><i class="fa-solid fa-recycle icon"></i> Carbon Dioxide (CO2) का सफर</h3><ul class="card-content text-sm space-y-2 pl-2"><li><i class="fa-solid fa-check text-green-500 w-5"></i> <strong>70%:</strong> Bicarbonate (HCO3-) बनकर</li><li><i class="fa-solid fa-check text-green-500 w-5"></i> <strong>23%:</strong> Hemoglobin के साथ जुड़कर</li><li><i class="fa-solid fa-check text-green-500 w-5"></i> <strong>7%:</strong> Plasma में घुलकर</li><li><i class="fa-solid fa-check text-green-500 w-5"></i> <strong>Cl Shift:</strong> संतुलन बनाने की प्रक्रिया</li></ul></div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Matrix & Revision -->
+        <div id="slide4" class="slide">
+            <div class="brand-logo">Prepe</div>
+            <h1 class="slide-title">⚡ Revision Matrix & बीमारियां</h1>
+            <div class="flex-grow w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+                <div class="card"><h3 class="card-title"><i class="fa-solid fa-book-medical icon"></i> जरूरी शब्द (Key Terms)</h3><ul class="card-content text-sm list-disc list-inside space-y-2.5 pl-2"><li><strong>Apnea:</strong> सांस का रुक जाना</li><li><strong>Dyspnea:</strong> सांस लेने में तकलीफ होना</li><li><strong>Hypoxia:</strong> शरीर में Oxygen की कमी</li></ul></div>
+                
+                <div class="card"><h3 class="card-title" style="--icon-color: #1d4ed8; --icon-bg: #e0e7ff;"><i class="fa-solid fa-virus icon"></i> बीमारियां (Disorders)</h3><ul class="card-content text-sm list-disc list-inside space-y-2.5 pl-2"><li><strong>Asthma:</strong> सांस की नली में सूजन (सीटी बजना)</li><li><strong>Emphysema:</strong> Alveoli का खराब होना (धूम्रपान से)</li><li><strong>TB:</strong> बैक्टीरिया से होने वाला इन्फेक्शन</li></ul></div>
+                
+                <div class="card"><h3 class="card-title" style="--icon-color: #15803d; --icon-bg: #d1fae5;"><i class="fa-solid fa-calculator icon"></i> याद रखने वाले नंबर</h3><ul class="card-content text-sm list-disc list-inside space-y-2.5 pl-2"><li><strong>Rate:</strong> 12-16 बार प्रति मिनट</li><li><strong>Blood pH:</strong> 7.35 - 7.45 (हल्का क्षारीय)</li><li><strong>Dead Space:</strong> 150 ml (जो हवा काम नहीं आती)</li></ul></div>
+                
+                <div class="card"><h3 class="card-title" style="--icon-color: #be123c; --icon-bg: #ffe4e6;"><i class="fa-solid fa-star icon"></i> खास अंग (Structures)</h3><ul class="card-content text-sm list-disc list-inside space-y-2.5 pl-2"><li><strong>Adam’s Apple:</strong> गले की हड्डी (Thyroid)</li><li><strong>Epiglottis:</strong> खाने को सांस नली में जाने से रोकता है</li><li><strong>Pleura:</strong> फेफड़ों की सुरक्षा जैकेट</li></ul></div>
+                
+                <div class="card"><h3 class="card-title" style="--icon-color: #701a75; --icon-bg: #f3e8ff;"><i class="fa-solid fa-bolt icon"></i> जल्दी याद करें (Quick Facts)</h3><ul class="card-content text-sm list-disc list-inside space-y-2.5 pl-2"><li><strong>Right Lung:</strong> चौड़ा और छोटा होता है</li><li><strong>Left Lung:</strong> पतला और लंबा होता है</li><li><strong>Voice:</strong> वोकल कॉर्ड्स (Vocal Cords) से आती है</li></ul></div>
+                
+                <div class="card"><h3 class="card-title" style="--icon-color: #b45309; --icon-bg: #fef3c7;"><i class="fa-solid fa-circle-exclamation icon"></i> ये गलतियां न करें</h3><ul class="card-content text-sm list-disc list-inside space-y-2.5 pl-2"><li>जल्दी खाने से खाना Trachea में फंस सकता है</li><li>CO गैस बहुत खतरनाक है (दम घुटता है)</li><li>मुंह से सांस लेना गलत है (गंदी हवा जाती है)</li></ul></div>
+                
+                <div class="card sm:col-span-2 lg:col-span-3"><h3 class="card-title text-gray-700" style="--icon-color: #4b5563; --icon-bg: #e5e7eb;"><i class="fa-solid fa-list-check icon"></i> परीक्षा से पहले देखें (Checklist)</h3><ul class="card-content text-sm list-disc list-inside grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-2.5 pl-2"><li>Vital Capacity क्या है?</li><li>Oxygen-Hb Curve बनाओ</li><li>Chloride Shift समझो</li><li>फेफड़ों की Volumes याद करो</li><li>Surfactant का काम क्या है?</li><li>दाएं और बाएं फेफड़े में अंतर</li></ul></div>
+            </div>
+        </div>
+
+        <!-- Follow Up Section -->
+        <div class="slide">
+             <div class="flex flex-col h-full justify-center items-center text-center p-6 md:p-12 bg-gradient-to-br from-gray-50 to-blue-100">
+                <p class="text-xl md:text-2xl font-semibold text-blue-600 mb-2 md:mb-4">Welcome to Prepe</p>
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-3 md:mb-5"> अपनी तैयारी को नई उड़ान दें!</h2>
+                <p class="text-base md:text-lg text-gray-600 mb-8 md:mb-12">Exam-ready notes और quizzes के लिए।</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 mb-8 md:mb-12 w-full max-w-4xl">
+                    <a href="https://offer.prepeai.in" target="_blank" class="block bg-white p-6 rounded-2xl border border-gray-200 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 ease-in-out">
+                        <i class="fa-solid fa-tags text-4xl text-green-500 mb-3"></i>
+                        <h3 class="font-bold text-lg text-green-800">Free Resources</h3>
+                        <p class="text-sm text-gray-500 mt-1">Limited Time Access</p>
+                    </a>
+                    <a href="https://shop.prepeai.in" target="_blank" class="block bg-white p-6 rounded-2xl border border-gray-200 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 ease-in-out">
+                        <i class="fa-solid fa-layer-group text-4xl text-teal-500 mb-3"></i>
+                        <h3 class="font-bold text-lg text-teal-800">More Topics</h3>
+                        <p class="text-sm text-gray-500 mt-1">Expand Your Knowledge</p>
+                    </a>
+                    <a href="https://instagram.com/prepe.ai" target="_blank" class="block bg-white p-6 rounded-2xl border border-gray-200 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 ease-in-out">
+                        <i class="fab fa-instagram text-4xl text-pink-500 mb-3"></i>
+                        <h3 class="font-bold text-lg text-pink-800">Follow on Instagram</h3>
+                        <p class="text-sm text-gray-500 mt-1">@prepe.ai</p>
+                    </a>
+                </div>
+                <div class="border-t-2 border-dashed border-gray-300 pt-8 md:pt-10 w-full max-w-4xl">
+                    <a href="https://www.prepeai.in" target="_blank" class="inline-block bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold text-lg md:text-xl py-3 px-8 md:py-4 md:px-10 rounded-full shadow-lg hover:scale-105 transition-transform duration-300">
+                        <i class="fa-solid fa-globe mr-2"></i> Visit Prepe Website
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <button id="download-pdf-btn">
+        <i class="fa-solid fa-file-pdf mr-2"></i> Download PDF
+    </button>
+
+    <script>
+        const downloadPdfBtn = document.getElementById('download-pdf-btn');
+        const loaderOverlay = document.getElementById('loader-overlay');
+
+        downloadPdfBtn.addEventListener('click', async () => {
+            loaderOverlay.style.display = 'flex';
+            
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({
+                orientation: 'portrait',
+                unit: 'px',
+                format: [1080, 1080]
+            });
+
+            const slides = document.querySelectorAll('.slide');
+            
+            for (let i = 0; i < slides.length; i++) {
+                const slide = slides[i];
+                
+                const canvas = await html2canvas(slide, {
+                    width: 1080,
+                    height: 1080,
+                    scale: 2,
+                    useCORS: true,
+                    backgroundColor: null, 
+                    logging: false,
+                });
+                
+                const finalCanvas = document.createElement('canvas');
+                finalCanvas.width = canvas.width;
+                finalCanvas.height = canvas.height;
+                const ctx = finalCanvas.getContext('2d');
+                
+                const gradient = ctx.createLinearGradient(0, 0, finalCanvas.width, finalCanvas.height);
+                gradient.addColorStop(0, '#f5f7fa');
+                gradient.addColorStop(1, '#dbe7ff');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
+                
+                ctx.drawImage(canvas, 0, 0);
+
+                const imgData = finalCanvas.toDataURL('image/jpeg', 0.9);
+
+                if (i > 0) {
+                    doc.addPage([1080, 1080], 'portrait');
+                }
+                
+                doc.addImage(imgData, 'JPEG', 0, 0, 1080, 1080);
+
+                const links = slide.querySelectorAll('a[href]');
+                if (links.length > 0) {
+                    const originalWidth = slide.offsetWidth;
+                     links.forEach(link => {
+                        const rect = link.getBoundingClientRect();
+                        const slideRect = slide.getBoundingClientRect();
+                        
+                        // Scale factor to convert screen pixels to PDF points
+                        const scaleX = 1080 / slide.offsetWidth;
+                        
+                        // We need the bounding box relative to the slide
+                        const x = rect.left - slideRect.left;
+                        const y = rect.top - slideRect.top;
+                        
+                        doc.link(x * scaleX, y * scaleX, rect.width * scaleX, rect.height * scaleX, { url: link.href });
+                    });
+                }
+            }
+
+            doc.save('Prepe-Respiratory-System.pdf');
+            loaderOverlay.style.display = 'none';
+        });
+    </script>
+</body>
+</html>
